@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Score</title>
+</head>
+
+<style>
+    body{
+        padding: 0;
+        margin: 0;
+        width: 100%;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-image: url('./image/cardsbaground_image.jpg');
+        background-repeat: none;
+        background-position: center;
+        background-size: cover;
+    }
+    #viewScore{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    #viewScore{
+        width: 120px;
+        height: 50px;
+        color: rgb(53, 53, 53);
+        font-size: large;
+        font-weight: bold;
+        background-color: rgb(82, 208, 145);
+        border: 3px solid black;
+    }
+    #viewScore:hover{
+        background-color: rgb(56, 186, 97);
+        color: black;
+        transition: 0.3s;
+    }
+    #table{
+        width: 750px;
+        height: 550px;
+        display: flex;
+        flex-direction: column;
+        background-color: rgb(99, 201, 167);
+        border: 4px solid black;
+        justify-content: space-evenly;
+    }
+
+    .d{
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+    }
+
+    .temp{
+        width: 25%;
+        display: flex;
+        justify-content: center;
+    }
+
+    #line{
+        border-left: 3px solid rgb(49, 49, 49);
+        height: 40px;
+        transform: rotate(-25deg);
+    }
+
+    .Players_Scores,
+    #d0,
+    #table{
+        position: relative;
+    }
+
+    #playerHDiv{
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 50;
+        left: 50;
+        color: aliceblue;
+    }
+
+    #d14{
+        color: rgb(32, 32, 32);
+        font-size: larger;
+        font-weight: bolder;
+    }
+
+    #scoreHDiv{
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        color: aliceblue;
+    }
+
+</style>
+<body>
+    <div id="VSdiv">
+        <button id="viewScore" onclick="display()">View Score</button>
+    </div>
+</body>
+<script>
+    function display(){
+        const vsButton = document.getElementById('VSdiv');
+        vsButton.parentNode.removeChild(vsButton);
+
+        const outerDiv = document.createElement('div');
+        outerDiv.id = 'table';
+
+        for (let i=0; i<15; i++){
+            const innerDiv = document.createElement('div');
+            innerDiv.className = 'd';
+            innerDiv.id = `d${i}`
+
+            for (let j=0; j<5; j++){
+                const div = document.createElement('div');
+                div.className = 'temp ';
+
+                if (i===0){
+                    if (j===0){
+                        div.className += 'Players_Scores';
+                        const playerHDiv = document.createElement('div');
+                        const line = document.createElement('div');
+                        const scoreHDiv = document.createElement('div');
+
+                        playerHDiv.id = 'playerHDiv';
+                        scoreHDiv.id = 'scoreHDiv';
+                        line.id = 'line';
+
+                        playerHDiv.innerHTML = 'Players';
+                        scoreHDiv.innerHTML = 'Scores';
+
+                        div.appendChild(scoreHDiv);
+                        div.appendChild(line);
+                        div.appendChild(playerHDiv);
+
+                        innerDiv.appendChild(div);
+                    }
+                    else if(j !== 4){
+                        div.id += `PC_${j}`;
+                        div.innerHTML = `PC ${j}`;
+
+                        innerDiv.appendChild(div);
+                    }
+                    else{
+                        div.id += `Player`;
+                        div.innerHTML = `Player`;
+
+                        innerDiv.appendChild(div);
+                    }
+                }
+                else if(i !== 14){
+                    if (j===0){
+                        div.className += `round${i}`;
+                        div.innerHTML = `Round ${i}`;
+
+                        innerDiv.appendChild(div);
+                    }
+                    else{
+                        div.id += `score_R${i}_P${j}`;
+                        div.innerHTML = `-`;
+
+                        if (j===1) div.id = `d${i}B1`;
+                        else if (j===2) div.id = `d${i}B2`;
+                        else if (j===3) div.id = `d${i}B3`;
+                        else if (j===4) div.id = `d${i}P`;
+
+                        innerDiv.appendChild(div);
+                    }
+                }
+                else{
+                    if (j===0){
+                        div.id += `total`;
+                        div.innerHTML = `Total`;
+
+                        innerDiv.appendChild(div);
+                    }
+                    else if(j !== 4){
+                        div.id += `PC_${j}_total`;
+                        div.innerHTML = `-`;
+
+                        innerDiv.appendChild(div);
+                    }
+                    else{
+                        div.id += `player_total`;
+                        div.innerHTML = `-`;
+
+                        innerDiv.appendChild(div);
+                    }
+                }
+                outerDiv.appendChild(innerDiv);
+            }
+            const body = document.querySelector('body');
+            body.appendChild(outerDiv);
+            body.style.backgroundColor = 'transparent';
+        }
+
+        updateScore('table');
+    }
+
+    let pc1Total = 0;
+    let pc2Total = 0;
+    let pc3Total = 0;
+    let playerTotal = 0;
+
+
+    function updateScore(id){
+        const table = document.getElementById(id);
+        
+        const points = JSON.parse(localStorage.getItem('points'));
+
+        const list = [];
+
+        for (key in points){
+            points[key].forEach(element => {
+                // console.log(points);
+                if (key == 'playerPoints'){
+                    playerTotal += 10;
+                    const splited = element.split(',');
+                    const id = 'd'+splited[0]+'P';
+
+                    const div = document.getElementById(id);
+                    div.innerHTML = 10;
+                }
+                else if (key == 'botEPoints'){
+                    pc2Total += 10;
+                    const splited = element.split(',');
+                    const id = 'd'+splited[0]+'B2';
+
+                    const div = document.getElementById(id);
+                    div.innerHTML = 10;
+                }
+                else if (key == 'botWPoints'){
+                    pc3Total += 10;
+                    const splited = element.split(',');
+                    const id = 'd'+splited[0]+'B3';
+
+                    const div = document.getElementById(id);
+                    div.innerHTML = 10;
+                }
+                else if (key == 'botNPoints'){
+                    pc1Total += 10;
+                    const splited = element.split(',');
+                    const id = 'd'+splited[0]+'B1';
+
+                    const div = document.getElementById(id);
+                    div.innerHTML = 10;
+                }
+            });
+        }
+        document.getElementById('PC_1_total').innerHTML = pc1Total;
+        document.getElementById('PC_2_total').innerHTML = pc2Total;
+        document.getElementById('player_total').innerHTML = playerTotal;
+        document.getElementById('PC_3_total').innerHTML = pc3Total;
+    }
+</script>
+</html>

@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot GamePlay</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+        }
+
+        body{
+            height: 100vh;
+            width: 100%;
+            background-image: url('./image/cardsbaground_image.jpg');
+            background-repeat: none;
+            background-position: center;
+            background-size: cover;
+        }
+        .cont{
+            height: calc(100%/3);
+            display: flex;
+            align-items: center;
+        }
+
+        .r1,
+        .r3{
+            justify-content: center;
+            /* background-color: antiquewhite; */
+            padding-left: 106px;
+        }
+
+        .r2{
+            justify-content: space-evenly;
+            /* background-color: blanchedalmond; */
+        }
+
+        .card{
+            height: 180px;
+            width: 120px;
+            background-color: white;
+            padding: 13px;
+            background-size: 38px;
+            background-repeat: no-repeat;
+            background-position: center;
+            box-shadow: rgba(0, 0, 0, 0.15) 0px 0px 7px 0px;;
+            border-radius: 8px;
+            font-size: large;
+            font-weight: bolder;
+        }
+        .card{
+            display: flex;
+            justify-content: space-between;
+            flex-direction: column;
+        }
+        .end{
+            display: flex;
+            justify-content: end;
+        }
+
+        .right,
+        .left{
+            display: flex;
+            /* width: 450px; */
+        }
+
+        .right{
+            transform: rotate(90deg);
+        }
+        .left{
+            transform: rotate(-90deg);
+        }
+
+        .start{
+            display: flex;
+            flex-direction: column;
+        }
+
+        .image{
+            height: 18px;
+            width: 18px;
+        }
+        .over{
+            z-index: 16;
+            margin-left: -110px;
+        }
+
+        #space{
+            width: calc(100%/2.5);
+            height: 100%;
+            /* background-color: azure; */
+            display: flex;
+            justify-content: space-evenly;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="r1 cont north" id="north"></div>
+
+    <div class="r2 cont">
+        <div class="c21 left west"  id="west"></div>
+        <div id="space"></div>
+        <div class="c22 right east"  id="east"></div>
+    </div>
+    
+    <div class="r3 cont south"  id="south"></div>
+</body>
+
+<script>
+
+    const pointTable = {
+        'botNPoints' : [],
+        'botEPoints' : [],
+        'botWPoints' : [],
+        'playerPoints' : []
+    };
+
+    function shuffle(deck) {
+        let n = deck.length;
+        for (let i = n - 1; i > 0; i--) {
+            let j = Math.floor(Math.random() * (i + 1));
+            [deck[i], deck[j]] = [deck[j], deck[i]];
+        }
+        return deck;
+    }
+
+    let deck = [
+        '2 S', '3 S', '4 S', '5 S', '6 S', '7 S', '8 S', '9 S', '10 S', 'J S', 'Q S', 'K S', 'A S',
+        '2 H', '3 H', '4 H', '5 H', '6 H', '7 H', '8 H', '9 H', '10 H', 'J H', 'Q H', 'K H', 'A H',
+        '2 D', '3 D', '4 D', '5 D', '6 D', '7 D', '8 D', '9 D', '10 D', 'J D', 'Q D', 'K D', 'A D',
+        '2 C', '3 C', '4 C', '5 C', '6 C', '7 C', '8 C', '9 C', '10 C', 'J C', 'Q C', 'K C', 'A C'
+    ];
+
+    deck1 = shuffle(deck);
+
+    let nCards = deck1.slice(0,13);
+    let eCards = deck1.slice(13,26);
+    let sCards = deck1.slice(26,39);
+    let wCards = deck1.slice(39,52);
+
+    const players = ['n','e','s','w'];
+    let toplay = 0;
+    let cardList = [];
+    const trump = 'NT';
+    let totalRound = 0;
+    // const points = {
+    //     'n' : 0,
+    //     'e' : 0,
+    //     'w' : 0,
+    //     's' : 0
+    // };
+    
+    function generate13CArds(cards,cards_details,parent,player){
+        for (let i=0;i<13;i++){
+            let card = document.createElement('div');
+            card.className = 'card over true';
+            let img_src;
+
+            let specific_card = cards_details[i];
+            card.id = specific_card+parent;
+            let list = specific_card.split(' ');
+
+            let number = list[0];
+            let shape = list[list.length-1];
+
+            if(player === 'p'){
+                
+                card.addEventListener('click',()=>{ addCardsToSpace(specific_card+parent) });
+
+                if (shape === 'D'){
+                    card.innerHTML = `
+                    <div class="start">${number}<img class="image" src="./image/diamond.jpg" alt="symbol"></div>
+                    <div class="end">${number}</div>`;
+                    card.style.backgroundImage = 'url(./image/diamond.jpg)';
+                }
+                else if(shape === 'H'){
+                    card.innerHTML = `
+                    <div class="start">${number}<img class="image" src="./image/heart.jpg" alt="symbol"></div>
+                    <div class="end">${number}</div>`;
+                    card.style.backgroundImage = 'url(./image/heart.jpg)';
+                }
+                else if(shape === 'S'){
+                    card.innerHTML = `
+                    <div class="start">${number}<img class="image" src="./image/spade.jpg" alt="symbol"></div>
+                    <div class="end">${number}</div>`;
+                    card.style.backgroundImage = 'url(./image/spade.jpg)';
+                }
+                else if(shape === 'C'){
+                    card.innerHTML = `
+                    <div class="start">${number}<img class="image" src="./image/clover.jpg" alt="symbol"></div>
+                    <div class="end">${number}</div>`;
+                    card.style.backgroundImage = 'url(./image/clover.jpg)';
+                }
+            }
+            else if(player ==='b'){
+                card.style.backgroundImage = "url('./image/IMG-20240603-WA0006.jpg')";
+                card.style.backgroundSize = 'cover';
+            }
+
+            else console.log('err');
+
+            cards.appendChild(card);
+        }
+    }
+    function createCards(){
+        const cardtop = document.getElementById('north');
+        const cardleft = document.getElementById('west');
+        const cardright = document.getElementById('east');
+        const cardBottom = document.getElementById('south');
+
+        generate13CArds(cardtop,nCards,' n','b');
+        generate13CArds(cardleft,wCards,' w','b');
+        generate13CArds(cardright,eCards,' e','b');
+        generate13CArds(cardBottom,sCards,' s','p');
+
+        // blockPlay();
+        play();
+        // need to bring bidding here
+    }
+
+    window.onload = createCards();
+
+    function addCardsToSpace(specific_card){
+
+        const space = document.getElementById('space');
+
+        cardID = document.getElementById(specific_card);
+        card_id = cardID.id.split(' ');
+
+        if (card_id[2] !== 's'){
+            const number = card_id[0];
+            if (card_id[1] === 'D'){
+                    cardID.innerHTML = `
+                    <div class="start">${number}<img class="image" src="./image/diamond.jpg" alt="symbol"></div>
+                    <div class="end">${number}</div>`;
+                    cardID.style.backgroundSize = '38px';
+                    cardID.style.backgroundImage = 'url(./image/diamond.jpg)';
+                }
+                else if(card_id[1] === 'H'){
+                    cardID.innerHTML = `
+                    <div class="start">${number}<img class="image" src="./image/heart.jpg" alt="symbol"></div>
+                    <div class="end">${number}</div>`;
+                    cardID.style.backgroundSize = '38px';
+                    cardID.style.backgroundImage = 'url(./image/heart.jpg)';
+                }
+                else if(card_id[1] === 'S'){
+                    cardID.innerHTML = `
+                    <div class="start">${number}<img class="image" src="./image/spade.jpg" alt="symbol"></div>
+                    <div class="end">${number}</div>`;
+                    cardID.style.backgroundSize = '38px';
+                    cardID.style.backgroundImage = 'url(./image/spade.jpg)';
+                }
+                else if(card_id[1] === 'C'){
+                    cardID.innerHTML = `
+                    <div class="start">${number}<img class="image" src="./image/clover.jpg" alt="symbol"></div>
+                    <div class="end">${number}</div>`;
+                    cardID.style.backgroundSize = '38px';
+                    cardID.style.backgroundImage = 'url(./image/clover.jpg)';
+                }
+                else console.log('err');
+        }
+
+        if (cardID.classList.contains('true')){
+            
+            let flag = 0;
+            if (players[toplay] === 's'){
+                // console.log(players);
+                // console.log("south has played");
+                flag = 1;
+            }
+            
+            space.appendChild(cardID);
+
+            cardID.classList.replace('true','false');
+
+            cardList.push(cardID)
+
+            if (cardList.length % 4 === 0){
+                blockPlay(0);
+
+                totalRound++;
+
+                const playerWonRound = roundComplete(cardList);
+                // console.log(cardList);
+                for (let i=0; i<4; i++){
+                    if (playerWonRound != players[0]){
+                        const firstPlayer = players.shift();
+                        players.push(firstPlayer);
+                    }
+                }
+
+                setTimeout(()=>{
+                    for (let i=0;i<4;i++){
+                        space.removeChild(cardList[0]);
+                        cardList.shift();
+                    }
+                },1000);
+
+                if (totalRound === 13)
+                    scorePage();
+            }
+
+            // console.log(toplay);
+            
+
+            toplay++;
+
+            
+            if (toplay >= players.length){
+                toplay = toplay % players.length;
+            }
+
+            blockPlay();
+
+            if (flag === 1){
+                console.log(players);
+                console.log('so next turn will be',players[toplay]);
+                flag = 0;
+                play();
+            }
+        }
+    }
+    function blockPlay(all = 1){
+        const divsNorth = Array.from(document.getElementById('north').children);
+        const divsWest = Array.from(document.getElementById('west').children);
+        const divsEast = Array.from(document.getElementById('east').children);
+        const divsSouth = Array.from(document.getElementById('south').children);
+
+        const allDivs = [];
+
+        if (all === 1){
+            if (players[toplay] === 'n'){
+                divsEast.forEach( element => { allDivs.push(element) });
+                divsWest.forEach( element => { allDivs.push(element) });
+                divsSouth.forEach( element => { allDivs.push(element) });
+
+                divsNorth.forEach(element => { element.classList.replace('false','true') });
+                allDivs.forEach(element => { element.classList.replace('true','false') });
+            }
+            else if (players[toplay] === 'e'){
+                divsNorth.forEach( element => { allDivs.push(element) });
+                divsWest.forEach( element => { allDivs.push(element) });
+                divsSouth.forEach( element => { allDivs.push(element) });
+
+                divsEast.forEach(element => { element.classList.replace('false','true') });
+                allDivs.forEach(element => { element.classList.replace('true','false') });
+            }
+            else if (players[toplay] === 'w'){
+                divsEast.forEach( element => { allDivs.push(element) });
+                divsNorth.forEach( element => { allDivs.push(element) });
+                divsSouth.forEach( element => { allDivs.push(element) });
+
+                divsWest.forEach(element => { element.classList.replace('false','true') });
+                allDivs.forEach(element => { element.classList.replace('true','false') });
+            }
+            else if (players[toplay] === 's'){
+                divsEast.forEach( element => { allDivs.push(element) });
+                divsWest.forEach( element => { allDivs.push(element) });
+                divsNorth.forEach( element => { allDivs.push(element) });
+
+                divsSouth.forEach(element => { element.classList.replace('false','true') });
+                allDivs.forEach(element => { element.classList.replace('true','false') });
+            }
+        }
+        else if (all === 0){
+            divsWest.forEach( element => { allDivs.push(element) });
+            divsEast.forEach( element => { allDivs.push(element) });
+            divsNorth.forEach( element => { allDivs.push(element) });
+            divsSouth.forEach( element => { allDivs.push(element) });
+            
+            allDivs.forEach(element => { element.classList.replace('true','false') });
+        }
+    }
+
+    function play(){
+        // console.log(points);
+        if (players[toplay] != 's'){
+            if (toplay === 0 ){
+                setTimeout(()=>{
+                    // console.log(toplay);
+                    console.log('bot first');
+                    botFirst(toplay) },2000)
+            }
+            else {
+                setTimeout(()=>{
+                    // console.log(toplay);
+                    console.log('bot play', toplay);
+                    botPlay(players[toplay]); },1500)
+            }
+        }
+    }
+
+    function botPlay(player){
+        // console.log(player);
+        const leadingCard = cardList[0].id.split(' ');
+        const leadingShape = leadingCard[1];
+        const leadingNum = leadingCard[0];
+
+        if (player === 'n') player = 'north';
+        else if (player === 'e') player = 'east';
+        else if (player === 'w') player = 'west';
+
+        const cardsDiv = Array.from(document.getElementById(player).children);
+
+        const cards = [];
+        cardsDiv.forEach(element => { cards.push(element.id.split(' ')) });
+
+        let max = 0;let maxCard;
+        let min = Infinity;let minCard;
+        let id = '';
+        for (let i=0;i<cards.length;i++){
+            if (cards[i][1] === leadingShape){
+                if (parseInt(cards[i][0]) > max) {max = parseInt(cards[i][0]); maxCard = cards[i];}
+                if (parseInt(cards[i][0]) < min) {min = parseInt(cards[i][0]); minCard = cards[i];}
+            }
+        }
+        if (max !== 0 && min !== Infinity){
+            if (max>leadingNum){
+                for (let i=0; i<3; i++){
+                    if (i===2) id+=maxCard[i];
+                    else id+=maxCard[i]+' ';}
+                }
+            else{
+                for (let i=0; i<3; i++){
+                    if (i===2) id+=minCard[i];
+                    else id+=minCard[i]+' ';}
+                }
+            addCardsToSpace(id);
+            play();
+        }
+        if (max === 0 && min === Infinity) {
+            let temp;
+            for (let i=0;i<cards.length;i++){
+                for (let j=0; j<cards.length-i-1; j++){
+                    if (parseInt(cards[j][0]) > parseInt(cards[j+1][0])){
+                        temp = cards[j];
+                        cards[j] = cards[j+1];
+                        cards[j+1] = temp;
+                    }
+                }
+            }
+            minCard = cards[0];
+            for (let i=0; i<3; i++){
+                if (i===2) id+=minCard[i];
+                else id+=minCard[i]+' ';}
+            addCardsToSpace(id);
+            play();
+        }
+    }
+
+
+    function botFirst(player){
+        if (player === 0){
+            player = players[player]
+            // console.log(player);
+            if (trump === "NT"){
+                if (player === 'n') player = 'north'
+                else if (player === 'e') player = 'east'
+                else if (player === 'w') player = 'west'
+                
+                const cardsDiv = Array.from(document.getElementById(player).children);
+
+                const cards = [];
+                cardsDiv.forEach(element => { cards.push(element.id.split(' ')) });
+
+                let temp;
+                for (let i=0;i<cards.length;i++){
+                    for (let j=0; j<cards.length-i-1; j++){
+                        if (parseInt(cards[j][0]) > parseInt(cards[j+1][0])){
+                            temp = cards[j];
+                            cards[j] = cards[j+1];
+                            cards[j+1] = temp;
+                        }
+                    }
+                }
+
+                let id = '';
+
+                for (let i=0; i<3; i++){
+                    if (i===2)
+                        id+=cards[cards.length-1][i];
+                    else
+                        id+=cards[cards.length-1][i]+' ';
+                }
+                addCardsToSpace(id);
+                play();
+            }
+        }
+    }
+
+    function roundComplete(list){
+        const firstElement = list[0].id;
+        const leadingShape = firstElement.split(' ')[1];
+        let max = '';
+        let maxNum = 0;
+
+        const roundList = [];
+
+        list.forEach(element => {
+            const tempElement = element.id.split(' ');
+            console.log(tempElement);
+            if (tempElement[0] === 'A')
+                tempElement[0] = '14';
+            else if (tempElement[0] === 'K')
+                tempElement[0] = '13'
+            else if (tempElement[0] === 'Q')
+                tempElement[0] = '12'
+            else if (tempElement[0] === 'J')
+                tempElement[0] = '11'
+            console.log(tempElement);
+            roundList.push(tempElement);
+        });
+
+        if (trump == 'NT'){
+            roundList.forEach(element => {
+                if (element[1] == leadingShape){                    
+                    if (maxNum < parseInt(element[0])){
+                        maxNum = element[0];
+                        max = element[2];
+                    }
+                }
+            })
+        }
+        else {
+            let containTrump = false;
+            roundList.forEach(element => {
+                if (element.includes(trump))
+                    containTrump = true;
+            })
+
+            roundList.forEach(element => {
+                if (containTrump){
+                    if (trump == element[1]){
+                        if (maxNum < parseInt(element[0])){
+                            maxNum = element[0];
+                            max = element[2];
+                        }
+                    }
+                }
+                else{
+                    if (element[1] == leadingShape){                    
+                        if (maxNum < parseInt(element[0])){
+                            maxNum = element[0];
+                            max = element[2];
+                        }
+                    }
+                }
+            })
+        }
+        
+        if (max === 's') pointTable['playerPoints'].push(`${totalRound},10`);
+        else if(max === 'n') pointTable['botNPoints'].push(`${totalRound},10`);
+        else if(max === 'e') pointTable['botEPoints'].push(`${totalRound},10`);
+        else if(max === 'w') pointTable['botWPoints'].push(`${totalRound},10`);
+
+        console.log(pointTable);
+        
+        // points[max]++;
+        return max
+    }
+
+    function scorePage(){
+        localStorage.setItem('points',JSON.stringify(pointTable));
+        window.location.replace("/ScorePage");
+    }
+</script>

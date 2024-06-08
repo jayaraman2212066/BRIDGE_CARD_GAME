@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GamePlay</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+        }
+
+        body{
+            height: 100vh;
+            width: 100%;
+            background-image: url('./image/cardsbaground_image.jpg');
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .cont{
+            height: calc(100%/3);
+            display: flex;
+            align-items: center;
+        }
+
+        .r1,
+        .r3{
+            justify-content: center;
+            /* background-color: antiquewhite; */
+            padding-left: 106px;
+        }
+
+        .r2{
+            justify-content: space-evenly;
+            /* background-color: blanchedalmond; */
+        }
+
+        .card{
+            height: 180px;
+            width: 120px;
+            background-color: white;
+            padding: 13px;
+            background-size: 38px;
+            background-repeat: no-repeat;
+            background-position: center;
+            box-shadow: rgba(0, 0, 0, 0.15) 0px 0px 7px 0px;;
+            border-radius: 8px;
+            font-size: large;
+            font-weight: bolder;
+        }
+        .card{
+            display: flex;
+            justify-content: space-between;
+            flex-direction: column;
+        }
+        .end{
+            display: flex;
+            justify-content: end;
+        }
+
+        .right,
+        .left{
+            display: flex;
+            /* width: 450px; */
+        }
+
+        .right{
+            transform: rotate(90deg);
+        }
+        .left{
+            transform: rotate(-90deg);
+        }
+
+        .start{
+            display: flex;
+            flex-direction: column;
+        }
+
+        .image{
+            height: 18px;
+            width: 18px;
+        }
+        .over{
+            z-index: 16;
+            margin-left: -110px;
+        }
+
+        #space{
+            width: calc(100%/2.5);
+            height: 100%;
+            /* background-color: azure; */
+            display: flex;
+            justify-content: space-evenly;
+        }
+
+        /* bidding CSS */
+        #outer1{
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+
+        #outer1{
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 20;
+        }
+
+        
+        /* #outer{
+            width: 25%;
+            height: 25%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        } */
+        #temp{
+            width: 300px;
+            height: 150px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-evenly;
+            align-items: center;
+        }
+
+        #container{
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #bidding{
+            height: 450px;
+            width: 450px;
+            display: flex;
+            flex-direction: column;
+            background-color: rgb(99, 201, 167);
+            border: 4px solid black;
+        }
+
+        .d{
+            height: 100%;
+            width: 100%;
+            display: flex;
+            justify-content: space-evenly;
+            align-items: center;
+        }
+
+        .d>p{
+            font-size: large;
+            font-weight: bold;
+        }
+
+        .image{
+            /* height: 30px; */
+            display: flex;
+            justify-content: center;
+        }
+
+        .image1>img{
+            width: 30px;
+            height: 30px;
+            padding: 6px;
+        }
+
+        .pass>button{
+            width: 60px;
+            height: 30px;
+            border: 4px solid green;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .pass>button:hover{
+            color: white;
+            background-color: black;
+            transition: 0.3s;
+        }
+
+        #temp>button{
+            width: auto;
+            padding: 0 4px;
+            height: 30px;
+            border: 4px solid green;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        #temp>button:hover{
+            color: white;
+            background-color: black;
+            transition: 0.3s;
+        }
+        
+
+
+    </style>
+
+</head>
+<body id="body">
+    <div class="r1 cont north" id="north"></div>
+
+    <div class="r2 cont">
+        <div class="c21 left west"  id="west"></div>
+        <div id="space"></div>
+        <div class="c22 right east"  id="east"></div>
+    </div>
+    
+    <div class="r3 cont south"  id="south"></div>
+
+    
+    <div id="outer1">
+        <div id="outer">
+            <div id="container">
+                <h2 id="player"></h2>
+                <div id="bidding"></div>
+            </div>
+        </div>
+    </div>
+</body>
+
+<script>
+    function shuffle(deck) {
+        let n = deck.length;
+        for (let i = n - 1; i > 0; i--) {
+            let j = Math.floor(Math.random() * (i + 1));
+            [deck[i], deck[j]] = [deck[j], deck[i]];
+        }
+        return deck;
+    }
+
+    const pointTable = {
+        'nPlayerPoints' : [],
+        'ePlayerPoints' : [],
+        'wPlayerPoints' : [],
+        'sPlayerPoints' : []
+    };
+
+    let deck = [
+        '2 S', '3 S', '4 S', '5 S', '6 S', '7 S', '8 S', '9 S', '10 S', 'J S', 'Q S', 'K S', 'A S',
+        '2 H', '3 H', '4 H', '5 H', '6 H', '7 H', '8 H', '9 H', '10 H', 'J H', 'Q H', 'K H', 'A H',
+        '2 D', '3 D', '4 D', '5 D', '6 D', '7 D', '8 D', '9 D', '10 D', 'J D', 'Q D', 'K D', 'A D',
+        '2 C', '3 C', '4 C', '5 C', '6 C', '7 C', '8 C', '9 C', '10 C', 'J C', 'Q C', 'K C', 'A C'
+    ];
+
+    deck1 = shuffle(deck);
+
+    let nCards = deck1.slice(0,13);
+    let eCards = deck1.slice(13,26);
+    let sCards = deck1.slice(26,39);
+    let wCards = deck1.slice(39,52);
+    
+
+    const players = ['n','e','s','w'];
+    let toplay = 0;
+    let cardList = [];
+    let trump;
+
+    let totalRound = 0;
+
+    const points = {
+        'n' : 0,
+        'e' : 0,
+        'w' : 0,
+        's' : 0
+    }
+
+
+
+    class Bid {
+        constructor(suit, level, player) {
+            this.suit = suit;
+            this.level = level;
+            this.player = player;
+        }
+    }
+
+    class BinomialNode {
+        constructor(bid) {
+            this.bid = bid;
+            this.degree = 0;
+            this.parent = null;
+            this.child = null;
+            this.sibling = null;
+        }
+    }
+
+    class BinomialHeap {
+        constructor() {
+            this.head = null;
+        }
+
+        merge(heap2) {
+            this.head = this._mergeRoots(this.head, heap2.head);
+            heap2.head = null;
+            this._consolidate();
+        }
+
+        _mergeRoots(root1, root2) {
+            if (!root1) return root2;
+            if (!root2) return root1;
+
+            let newHead = null;
+            let tail = null;
+
+            while (root1 && root2) {
+                let min;
+                if (root1.degree <= root2.degree) {
+                    min = root1;
+                    root1 = root1.sibling;
+                } else {
+                    min = root2;
+                    root2 = root2.sibling;
+                }
+                if (!newHead) {
+                    newHead = min;
+                    tail = min;
+                } else {
+                    tail.sibling = min;
+                    tail = min;
+                }
+            }
+
+            if (root1) tail.sibling = root1;
+            else if (root2) tail.sibling = root2;
+
+            return newHead;
+        }
+
+        _consolidate() {
+            if (!this.head) return;
+
+            let prev = null;
+            let curr = this.head;
+            let next = curr.sibling;
+
+            while (next) {
+                if (curr.degree !== next.degree || (next.sibling && next.sibling.degree === curr.degree)) {
+                    prev = curr;
+                    curr = next;
+                } else {
+                    if (this._compareBids(curr.bid, next.bid) >= 0) {
+                        curr.sibling = next.sibling;
+                        this._linkTrees(curr, next);
+                    } else {
+                        if (prev) {
+                            prev.sibling = next;
+                        } else {
+                            this.head = next;
+                        }
+                        this._linkTrees(next, curr);
+                        curr = next;
+                    }
+                }
+                next = curr.sibling;
+            }
+        }
+
+        _linkTrees(parent, child) {
+            child.parent = parent;
+            child.sibling = parent.child;
+            parent.child = child;
+            parent.degree += 1;
+        }
+
+        _compareBids(bid1, bid2) {
+            const suitOrder = { 'Spades': 3, 'Hearts': 2, 'Diamonds': 1, 'Clubs': 0 };
+
+            if (bid1.level !== bid2.level) {
+                return bid1.level - bid2.level;
+            } else {
+                return suitOrder[bid1.suit] - suitOrder[bid2.suit];
+            }
+        }
+
+        findPreviousHighestBid() {
+            if (!this.head) return null;
+
+            let maxBid = this.head.bid;
+            let current = this.head.sibling;
+
+            while (current) {
+                if (this._compareBids(current.bid, maxBid) > 0) {
+                    maxBid = current.bid;
+                }
+                current = current.sibling;
+            }
+
+            return maxBid;
+        }
+
+        insert(bid) {
+            const newNode = new BinomialNode(bid);
+            const newHeap = new BinomialHeap();
+            newHeap.head = newNode;
+
+            this.merge(newHeap);
+            return 1;
+        }
+
+        extractMax() {
+            if (!this.head) return null;
+
+            let maxNode = this.head;
+            let maxNodePrev = null;
+            let prev = null;
+            let curr = this.head;
+
+            while (curr.sibling) {
+                if (this._compareBids(curr.sibling.bid, maxNode.bid) > 0) {
+                    maxNode = curr.sibling;
+                    maxNodePrev = prev;
+                }
+                prev = curr;
+                curr = curr.sibling;
+            }
+
+            if (maxNodePrev) {
+                maxNodePrev.sibling = maxNode.sibling;
+            } else {
+                this.head = maxNode.sibling;
+            }
+
+            const newHeap = new BinomialHeap();
+            newHeap.head = this._reverseChildren(maxNode.child);
+            this.merge(newHeap);
+
+            return maxNode.bid;
+        }
+
+        _reverseChildren(node) {
+            let prev = null;
+            let current = node;
+
+            while (current) {
+                const next = current.sibling;
+                current.sibling = prev;
+                prev = current;
+                current = next;
+            }
+
+            return prev;
+        }
+    }
+
+
+
+
+    createCards();
+
+
+    function createCards(){
+        const cardtop = document.getElementById('north');
+        const cardleft = document.getElementById('west');
+        const cardright = document.getElementById('east');
+        const cardBottom = document.getElementById('south');
+
+        generate13CArds(cardtop,nCards,' n');
+        generate13CArds(cardleft,wCards,' w');
+        generate13CArds(cardright,eCards,' e');
+        generate13CArds(cardBottom,sCards,' s');
+
+        blockPlay(0);
+
+        const body = document.getElementById('body');
+        const array = Array.from(body.children);
+        // console.log(array);
+        
+        Bidding();
+        // need to bring bidding here
+    }
+
+    function addCardsToSpace(specific_card){
+        const space = document.getElementById('space');
+        
+        cardID = document.getElementById(specific_card);
+
+        if (cardID.classList.contains('true')){
+
+            space.appendChild(cardID);
+
+            cardID.classList.replace('true','false');
+
+            cardList.push(cardID)
+            if (cardList.length % 4 == 0){
+                blockPlay(0);
+
+                totalRound++;
+
+                const playerWonRound = roundComplete(cardList);
+
+                console.log(points);
+
+                for (let i=0; i<4; i++){
+                    if (playerWonRound != players[0]){
+                        const firstPlayer = players.shift();
+                        players.push(firstPlayer);
+                    }
+                }
+
+                console.log(players);
+
+                setTimeout(()=>{
+                    for (let i=0;i<4;i++){
+                        space.removeChild(cardList[0]);
+                        cardList.shift();
+                    }
+                },500);
+            }
+
+            if (totalRound >= 13){
+                localStorage.setItem('points',JSON.stringify(pointTable));
+                window.location.replace("/ScorePage");
+            }
+
+            toplay++;
+            
+            if (toplay >= players.length){
+                toplay = toplay % players.length;
+            }
+            blockPlay();
+
+        // console.log(cardList.length);
+        }
+    }
+
+
+    function generate13CArds(cards,cards_details,parent){
+        for (let i=0;i<13;i++){
+            let card = document.createElement('div');
+            card.className = 'card over true';
+            let img_src;
+
+            let specific_card = cards_details[i];
+            card.id = specific_card+parent;
+            let list = specific_card.split(' ');
+
+            let number = list[0];
+            let shape = list[list.length-1];
+
+
+            card.addEventListener('click',()=>{ addCardsToSpace(specific_card+parent) })
+
+            if (shape == 'D'){
+                card.innerHTML = `
+                <div class="start">${number}<img class="image" src="./image/diamond.jpg" alt="symbol"></div>
+                <div class="end">${number}</div>`;
+                card.style.backgroundImage = 'url(./image/diamond.jpg)';
+            }
+            else if(shape == 'H'){
+                card.innerHTML = `
+                <div class="start">${number}<img class="image" src="./image/heart.jpg" alt="symbol"></div>
+                <div class="end">${number}</div>`;
+                card.style.backgroundImage = 'url(./image/heart.jpg)';
+            }
+            else if(shape == 'S'){
+                card.innerHTML = `
+                <div class="start">${number}<img class="image" src="./image/spade.jpg" alt="symbol"></div>
+                <div class="end">${number}</div>`;
+                card.style.backgroundImage = 'url(./image/spade.jpg)';
+            }
+            else if(shape == 'C'){
+                card.innerHTML = `
+                <div class="start">${number}<img class="image" src="./image/clover.jpg" alt="symbol"></div>
+                <div class="end">${number}</div>`;
+                card.style.backgroundImage = 'url(./image/clover.jpg)';
+            }
+            else console.log('err');
+
+            cards.appendChild(card);
+        }
+    }
+
+    
+    function roundComplete(list){
+        console.log(points);
+
+        const firstElement = list[0].id;
+        const leadingShape = firstElement.split(' ')[1];
+        let max = '';
+        let maxNum = 0;
+
+        const roundList = [];
+
+        list.forEach(element => {
+            const tempElement = element.id.split(' ');
+            if (tempElement[0] === 'A')
+                tempElement[0] = '14';
+            else if (tempElement[0] === 'K')
+                tempElement[0] = '13'
+            else if (tempElement[0] === 'Q')
+                tempElement[0] = '12'
+            else if (tempElement[0] === 'J')
+                tempElement[0] = '11'
+            roundList.push(tempElement);
+        });
+
+        if (trump == 'NT'){
+            roundList.forEach(element => {
+                if (element[1] == leadingShape){                    
+                    if (maxNum < parseInt(element[0])){
+                        maxNum = element[0];
+                        max = element[2];
+                    }
+                }
+            })
+        }
+        else {
+            let containTrump = false;
+            roundList.forEach(element => {
+                if (element.includes(trump))
+                    containTrump = true;
+            })
+
+            roundList.forEach(element => {
+                if (containTrump){
+                    if (trump == element[1]){
+                        if (maxNum < parseInt(element[0])){
+                            maxNum = element[0];
+                            max = element[2];
+                        }
+                    }
+                }
+                else{
+                    if (element[1] == leadingShape){                    
+                        if (maxNum < parseInt(element[0])){
+                            maxNum = element[0];
+                            max = element[2];
+                        }
+                    }
+                }
+            })
+        }
+        
+        if (max === 's')
+            pointTable['sPlayerPoints'].push(`${totalRound},10`);
+        else if(max === 'n')
+            pointTable['nPlayerPoints'].push(`${totalRound},10`);
+        else if(max === 'e')
+            pointTable['ePlayerPoints'].push(`${totalRound},10`);
+        else if(max === 'w')
+            pointTable['wPlayerPoints'].push(`${totalRound},10`);
+
+        points[max]++;
+        return max
+    }
+
+    function blockPlay(all = 1){
+        const divsNorth = Array.from(document.getElementById('north').children);
+        const divsWest = Array.from(document.getElementById('west').children);
+        const divsEast = Array.from(document.getElementById('east').children);
+        const divsSouth = Array.from(document.getElementById('south').children);
+
+        const allDivs = [];
+
+        if (all == 1){
+            if (players[toplay] == 'n'){
+                // console.log(divsNorth);
+                divsEast.forEach( element => { allDivs.push(element) });
+                divsWest.forEach( element => { allDivs.push(element) });
+                divsSouth.forEach( element => { allDivs.push(element) });
+
+                divsNorth.forEach(element => { element.classList.replace('false','true') });
+                allDivs.forEach(element => { element.classList.replace('true','false') });
+            }
+            else if (players[toplay] == 'e'){
+                // console.log(divsEast);
+                divsNorth.forEach( element => { allDivs.push(element) });
+                divsWest.forEach( element => { allDivs.push(element) });
+                divsSouth.forEach( element => { allDivs.push(element) });
+
+                divsEast.forEach(element => { element.classList.replace('false','true') });
+                allDivs.forEach(element => { element.classList.replace('true','false') });
+            }
+            else if (players[toplay] == 'w'){
+                // console.log(divsWest);
+                divsEast.forEach( element => { allDivs.push(element) });
+                divsNorth.forEach( element => { allDivs.push(element) });
+                divsSouth.forEach( element => { allDivs.push(element) });
+
+                divsWest.forEach(element => { element.classList.replace('false','true') });
+                allDivs.forEach(element => { element.classList.replace('true','false') });
+            }
+            else if (players[toplay] == 's'){
+                // console.log(divsSouth);
+                divsEast.forEach( element => { allDivs.push(element) });
+                divsWest.forEach( element => { allDivs.push(element) });
+                divsNorth.forEach( element => { allDivs.push(element) });
+
+                divsSouth.forEach(element => { element.classList.replace('false','true') });
+                allDivs.forEach(element => { element.classList.replace('true','false') });
+            }
+        }
+        else if (all == 0){
+            divsWest.forEach( element => { allDivs.push(element) });
+            divsEast.forEach( element => { allDivs.push(element) });
+            divsNorth.forEach( element => { allDivs.push(element) });
+            divsSouth.forEach( element => { allDivs.push(element) });
+            
+            allDivs.forEach(element => { element.classList.replace('true','false') });
+
+        }
+    }
+
+
+    function Bidding(){
+        let choices = ['n','e','s','w'];
+        let n = 0;
+        let bidded;
+        let passes = 0;
+        let chance = choices[n];
+        const bidHeap = new BinomialHeap();
+
+        function passCount(id){
+            const pass = document.getElementById(id);
+
+            passes++;
+            choices.splice(n,1);
+
+            if (n%choices.length == 0){
+                n = 0
+            }
+            if (choices.length == 0){
+                pass.onclick = null;
+
+                const temp = document.getElementById("container");
+                temp.innerHTML = '';
+
+                const outer = document.getElementById('outer');
+                const outerChild = Array.from(outer.children);
+
+                outerChild.forEach(element => { outer.remove(element) })
+
+                // chance = choices[n];
+                continueToGame()
+            }
+
+            chance = choices[n];
+            load();
+        }
+
+        function continueToGame(){
+            const outer1 = document.getElementById('outer1');
+
+            const outer = document.createElement('div');
+            outer.id = 'outer';
+            
+            const div = document.createElement('div');
+            div.id = 'temp';
+
+            const h1 = document.createElement('h1');
+
+            const biddedCard = bidHeap.extractMax();
+
+            let bidded_suit;
+            let bidded_level;
+            let bidWinner;
+
+            if (biddedCard !== null){
+                bidded_suit = biddedCard.suit;
+                bidded_level = biddedCard.level;
+                bidWinner = biddedCard.player;
+            }
+
+            console.log(bidded_level);
+            console.log(bidded_suit);
+            console.log(bidWinner);
+
+            if (biddedCard === null) h1.innerHTML = 'Bidding is passed<br>No Trump card';
+            else h1.innerHTML = `${bidWinner} won the bid<br>${bidded_suit} is Trump`;
+
+
+            if (bidded !== undefined){
+                while (chance != players[0]){
+                    const firstPlayer = players.shift();
+                    players.push(firstPlayer);
+                }
+            }
+
+            const continueButton = document.createElement('button');
+            continueButton.innerHTML = 'Continue...'
+            continueButton.onclick = function() { gamePage(outer1) };
+
+            outer.style.backgroundColor = 'rgb(99, 201, 167)';
+
+            div.appendChild(h1);
+            div.appendChild(continueButton);
+            outer.appendChild(div);
+            outer1.appendChild(outer);
+        }
+
+
+        function gamePage(outer1){
+            if (bidded === undefined) trump = 'NT';
+            else if (bidded.id[2] === '1') trump = 'C';
+            else if(bidded.id[2] === '2') trump = 'D';
+            else if(bidded.id[2] === '3') trump = 'H';
+            else if(bidded.id[2] === '4') trump = 'S';
+            
+            outer1.parentNode.removeChild(outer1);
+
+
+            blockPlay();
+        }
+
+        function load(){
+            // console.log(chance);
+            const player = document.getElementById('player');
+            if (chance == 'n')
+                player.innerHTML = "North has to BID";
+            else if (chance == 'e')
+                player.innerHTML = "East has to BID";
+            else if (chance == 's')
+                player.innerHTML = "South has to BID";
+            else if (chance == 'w')
+                player.innerHTML = "West has to BID";
+        }
+
+        load()
+
+        function bidding(id){
+            bidded = document.getElementById(id);
+
+            insertToHeap(id,choices[n]);
+
+            n++;
+
+            if (n%choices.length == 0){
+                n = 0
+            }
+            
+            chance = choices[n];
+            load()
+
+            changeColor(id);
+
+            if (id[1] == 7 && id[2] == 4){
+                n--;
+                chance = choices[n]
+                const temp = document.getElementById("container");
+                temp.innerHTML = '';
+
+                const outer = document.getElementById('outer');
+                const outerChild = Array.from(outer.children);
+
+                outerChild.forEach(element => { outer.remove(element) })
+
+                continueToGame();
+            }
+        }
+        function insertToHeap(id , player_in){
+            const level = id[1];
+            const suit_num = id[2];
+
+            let suit;
+            let player;
+            if (suit_num === '1') suit = 'Club';
+            else if (suit_num === '2') suit = 'Diamond';
+            else if (suit_num === '3') suit = 'Heart';
+            else if (suit_num === '4') suit = 'Spade';
+
+            if (player_in === 'n') player = 'North';
+            else if (player_in === 's') player = 'South';
+            else if (player_in === 'e') player = 'East';
+            else if (player_in === 'w') player = 'West';
+
+            bidHeap.insert(new Bid(suit, level, player));
+        }
+
+        function changeColor(id){
+            const row = id[1];
+            const column = id[2];
+            let card_id;
+
+            for (let i=1 ; i<=row; i++){
+                for (let j=1; j<5; j++){
+                    if (row == i && j==column){
+                        card_id = `r${i}${j}`;
+                        const cardToChange = document.getElementById(card_id);
+                        cardToChange.style.backgroundColor = 'rgba(80, 80, 80, 0.678)';
+                        cardToChange.onclick = null;
+                        return
+                    }
+                    card_id = `r${i}${j}`
+                    const cardToChange = document.getElementById(card_id);
+                    cardToChange.style.backgroundColor = 'rgba(80, 80, 80, 0.678)';
+                    cardToChange.onclick = null;
+                }
+            }
+        }
+
+        function generateScreen(){
+            // console.log('hi...');
+
+            const container = document.getElementById('bidding');
+
+            for (let i=1; i<8; i++){
+                const divouter = document.createElement('div');
+                divouter.className = `d d${i}`;
+
+                for (let j=0; j<5; j++){
+                    // console.log(i,j);
+                    if (j==0){
+                        const para = document.createElement('p');
+                        para.innerHTML = `${i}`;
+                        divouter.appendChild(para);
+                    }
+                    else{
+                        const divinner = document.createElement('div');
+                        divinner.className = `image1`;
+                        divinner.id = `r${i}${j}`;
+                        // divinner.setAttribute('onclick',function() {bidding(`r${i}${j}`)});
+                        divinner.onclick = function() { bidding(`r${i}${j}`) };
+
+                        const img = document.createElement('img');
+
+                        if (j==1){img.src = "./image/clover.jpg";img.alt = 'clover';}
+                        else if (j==2){img.src = "./image/diamond.jpg";img.alt = 'diamond';}
+                        else if (j==3){img.src = "./image/heart.jpg";img.alt = 'heart';}
+                        else if (j==4){img.src = "./image/spade.jpg";img.alt = 'spade';}
+
+                        divinner.appendChild(img);
+
+                        divouter.appendChild(divinner);
+                    }
+                }
+                container.appendChild(divouter);
+            }
+            const passDiv = document.createElement('pass');
+            passDiv.className = 'd pass';
+
+            const passButton = document.createElement('button');
+            passButton.innerHTML = 'Pass'
+            // passButton.addEventListener('click', function(){ passCount('pass') })
+            passButton.onclick = function() { passCount('pass') };
+            passButton.id = 'pass';
+
+            passDiv.appendChild(passButton);
+            container.appendChild(passDiv);
+        }
+
+        generateScreen();
+    }
+</script>
+
+</html>
